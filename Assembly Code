@@ -1,0 +1,49 @@
+START: MVI A,01 ;set A to 1
+MVI B,03   ;define the value for the base
+MVI C,01   ;define the exponent 
+
+
+CMP C   ;verify if A-C=0 or if its >0, if so we jump to end1
+JZ END1
+MVI A,00
+CMP C     ;verify if A-C=0 orA-C<0 Zflag is set , if so jump to END2
+JZ END2
+CMP B     ;verify if A-B=0 or A-B<0 Z flag is set if so it should return 0
+JZ END    ;if zero flag is on therefore it jumps directly to end 
+MOV E,B   ;Store B in E in order to do the sums of B without lossing the original value
+DCR C     ;Decrese C by one 
+JMP POW1
+
+POW1: MOV H,B       ;We store the value of B in H in order to have a way to count how manny B's were sum
+JMP MULTI        ; We start to do the sum of B+B C-times
+
+POW2: DCR C  ;loop to do the B+B Ctimes, until C=0, then we will know that we did all of the powers, here we decrement C by one without changing Z    flag
+MVI A,00     ;Set acumulator as 0
+CMP C        ;check if A-C=0, or A-C<0 if so Z flag changes it will be 0 wen we have done all of the C's
+MOV E,D      ;If c=0 it means we did all of the powers then we can display D 
+JZ END3      ;if zero flag is true then we conclude that all of the C's were done and jump to end3
+JMP POW1
+
+MULTI:ADD E  ;loop to do B+B C-times bassicaly the multiplication like the name implies, here we will do our sums with acumulator
+JC CARRY   ;check if we overflow
+MOV D,A    ;Store A in D,D will store all of the middle sums
+MVI A,00
+DCR H    ; Initialize our counter of how manny B's we have to add sience we are storing B's value in H 
+CMP H    ;Substract 1 from H until it reaches 0, if so it will mean that all of the B's were sum and flag z will be set 
+MOV A,D
+JNZ MULTI ; if zero flag is not set we go back again to the multiplication loop
+JMP POW2  ;we jump to the c loop to substract 1 until we reach C=0
+
+CARRY: MVI A,00  ;verify if the number overflows, it will happend if it generates a carry(carry flag=1)
+       JMP END	
+
+END1: MOV A,B   ;If A-C=0 it means that C is 1 therefore it should return B
+      JMP END
+
+END2: MVI A,01  ;If C=A=0 it returns 1 since x^1=0
+      JMP END
+
+END3: MOV A,D  ;In here we move the value of D(were we have been doing the inter sums) and display it in the acumulator
+      JMP END
+
+END: HLT	;we end the program
